@@ -3,43 +3,28 @@ name: Run Pytest
 on:
   push:
     branches:
-      - main  # Käivitub pushimisel main harusse
+      - main
   pull_request:
     branches:
-      - main  # Käivitub pull requesti korral main harusse
+      - main
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # Kasutame Ubuntu keskkonda
+    runs-on: ubuntu-latest
 
     steps:
-    # Kloonime repositooriumi
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # Seadistame Pythoni keskkonna
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'  # Kasutame uusimat Python 3 versiooni
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    # Installime sõltuvused
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    # Käivitame pytestid
-    - name: Run tests
-      run: |
-        pytest -v --junitxml=pytest-report.xml
-      env:
-        PYTHONPATH: ./src  # Lisame src kausta PYTHONPATH-i, et testid leiaksid moodulid
-
-    # Laadime üles testitulemused
-    - name: Upload test results
-      if: always()  # Laadime üles ka siis, kui testid ebaõnnestuvad
-      uses: actions/upload-artifact@v4
-      with:
-        name: pytest-results
-        path: pytest-report.xml
+      - name: Run tests
+        run: python -m pytest -q
